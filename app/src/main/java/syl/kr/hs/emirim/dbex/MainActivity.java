@@ -13,7 +13,7 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     EditText editName, editCount,editResultName, editResultCount;
-    Button butInit, butInsert, butSelect;
+    Button butInit, butInsert, butSelect,butupdate;
     MyDBHlpe myHelper;
     SQLiteDatabase sqldb;
 
@@ -24,10 +24,11 @@ public class MainActivity extends AppCompatActivity {
         editName=(EditText)findViewById(R.id.edit_group_name);
         editCount=(EditText)findViewById(R.id.edit_group_count);
         editResultName=(EditText)findViewById(R.id.edit_result_name);
-        editResultCount=(EditText)findViewById(R.id.edit_group_count);
+        editResultCount=(EditText)findViewById(R.id.edit_result_count);
         butInit=(Button)findViewById(R.id.but_init);
         butInsert=(Button)findViewById(R.id.but_insert);
         butSelect=(Button)findViewById(R.id.but_selecet);
+        butupdate=(Button)findViewById(R.id.but_update);
 
         //DB 생성
         myHelper=new MyDBHlpe(this);
@@ -59,8 +60,26 @@ public class MainActivity extends AppCompatActivity {
                 //rawQuary: select를 실행 수 커서 반환
                 String names="Idol 이름"+"\r\n"+"======="+"\r\n";
                 String count="Idol 인원수"+"\r\n"+"======="+"\r\n";
-                while(cursor.moveToNext());
+                while(cursor.moveToNext()){
+                    names +=cursor.getString(0)+"\r\n";
+                    count+=cursor.getInt(1)+"\r\n";
+
+                }
+                editResultName.setText(names);
+                editResultCount.setText(count);
+
+                cursor.close();
                 sqldb.close();
+            }
+        });
+        butupdate.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                sqldb=myHelper.getWritableDatabase();
+                String sql="update idolTable set idolcount="+editCount.getText()+" where idolName='"+editName.getText()+"'";//공백문자 꼭 필요
+                sqldb.execSQL(sql);
+                sqldb.close();
+                Toast.makeText(MainActivity.this,"수정되었습니다",Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -71,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
             //idolDb라 이름의 테이터 베이스가 생성된다.
             // public MyDBHlpe(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
             super(context, "idolDB", null, 1);
+
         }
 
         //idolTavble 라는 이름의 테이블 생성
@@ -84,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
         //이미 idolTable 이 존재한다면 기존의 테이블을 삭제하고, 새로 만들 때 호출
         @Override
         public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-        String sql="drop table if exist idolTable";
+        String sql="drop table if exists idolTable";
                 sqLiteDatabase.execSQL(sql);
                 onCreate(sqLiteDatabase);
         }
