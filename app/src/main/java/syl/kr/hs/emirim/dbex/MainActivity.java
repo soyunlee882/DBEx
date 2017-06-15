@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
         //DB 생성
         myHelper=new MyDBHlpe(this);
+
         //기존의 테이블이 존재하면 삭제하고 테이블을 새로 생성한다.
         butInit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
                sqldb=myHelper.getWritableDatabase();
                 myHelper.onUpgrade(sqldb,1,2);
                 sqldb.close();
+                selectTable();
             }
         });
         butInsert.setOnClickListener(new View.OnClickListener(){
@@ -50,27 +52,14 @@ public class MainActivity extends AppCompatActivity {
                 sqldb.execSQL(sql);
                 sqldb.close();
                 Toast.makeText(MainActivity.this,"저장되었습니다",Toast.LENGTH_LONG).show();
+                selectTable();
             }
         });
         butSelect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sqldb=myHelper.getReadableDatabase();
-                String sql="select*from idolTable";
-                Cursor cursor=sqldb.rawQuery(sql,null);
-                //rawQuary: select를 실행 수 커서 반환
-                String names="Idol 이름"+"\r\n"+"======="+"\r\n";
-                String count="Idol 인원수"+"\r\n"+"======="+"\r\n";
-                while(cursor.moveToNext()){
-                    names +=cursor.getString(0)+"\r\n";
-                    count+=cursor.getInt(1)+"\r\n";
+                selectTable();
 
-                }
-                editResultName.setText(names);
-                editResultCount.setText(count);
-
-                cursor.close();
-                sqldb.close();
             }
         });
         butupdate.setOnClickListener(new View.OnClickListener(){
@@ -81,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
                 sqldb.execSQL(sql);
                 sqldb.close();
                 Toast.makeText(MainActivity.this,"수정되었습니다",Toast.LENGTH_LONG).show();
+                selectTable();
             }
         });
         butdelete.setOnClickListener(new View.OnClickListener(){
@@ -91,11 +81,31 @@ public class MainActivity extends AppCompatActivity {
                 sqldb.execSQL(sql);
                 sqldb.close();
                 Toast.makeText(MainActivity.this,"삭제되었습니다",Toast.LENGTH_LONG).show();
+                selectTable();
             }
         });
+        selectTable();
 
     }
+   public void selectTable(){
+       sqldb=myHelper.getReadableDatabase();
+       String sql="select*from idolTable";
+       Cursor cursor=sqldb.rawQuery(sql,null);
+       //rawQuary: select를 실행 수 커서 반환
+       String names="Idol 이름"+"\r\n"+"======="+"\r\n";
+       String count="Idol 인원수"+"\r\n"+"======="+"\r\n";
+       while(cursor.moveToNext()){
+           names +=cursor.getString(0)+"\r\n";
+           count+=cursor.getInt(1)+"\r\n";
 
+       }
+       editResultName.setText(names);
+       editResultCount.setText(count);
+
+       cursor.close();
+       sqldb.close();
+
+   }
     class MyDBHlpe extends SQLiteOpenHelper{
 
         public MyDBHlpe(Context context) {
